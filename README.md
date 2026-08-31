@@ -49,6 +49,12 @@ Works out of the box with **ANY numeric Home Assistant entity** (Temperature, Hu
    - **Resource type**: `JavaScript Module`
 4. Refresh your browser.
 
+### Sections view
+
+The card implements `getGridOptions()` for Lovelace sections (Home Assistant 2024.11+). It asks for **6 columns** by default (half a section) and does **not** pin a row count. Height comes from the SVG aspect ratio plus the optional header, so it stays correct if you hide the header, change column width, or use a custom theme.
+
+If an older editor pass saved `grid_options.rows: 2` (header-only measurement), remove `rows` from that card so it can size itself again. You can still set `grid_options.rows` in YAML when you want a fixed cell; the card then fills that height.
+
 ---
 
 ## 📋 YAML Configuration Examples

@@ -4,6 +4,11 @@
  * Features curved textPath labels, boundary ticks, active bead marker, and dynamic HA GUI editor.
  */
 
+// Drawing coordinate space. CSS aspect-ratio must match so the card has an
+// intrinsic height in sections view before paint (no hardcoded row count).
+const GAUGE_VIEWBOX_WIDTH = 280;
+const GAUGE_VIEWBOX_HEIGHT = 155;
+
 class CurvedGaugeCard extends HTMLElement {
   constructor() {
     super();
@@ -152,7 +157,8 @@ class CurvedGaugeCard extends HTMLElement {
       <style>
         :host {
           display: block;
-          contain: content;
+          height: 100%;
+          box-sizing: border-box;
         }
         ha-card {
           background: var(--ha-card-background, var(--card-background-color, var(--ha-card-background, #ffffff)));
@@ -167,12 +173,16 @@ class CurvedGaugeCard extends HTMLElement {
           position: relative;
           overflow: hidden;
           cursor: pointer;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
         }
         .header {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
           margin-bottom: 6px;
+          flex-shrink: 0;
         }
         .header-text {
           display: flex;
@@ -215,13 +225,17 @@ class CurvedGaugeCard extends HTMLElement {
           display: flex;
           flex-direction: column;
           align-items: center;
+          justify-content: center;
           margin-top: 4px;
+          flex: 1 1 auto;
+          min-height: 0;
         }
         .gauge-svg {
           width: 100%;
           max-width: 340px;
           height: auto;
-          overflow: visible;
+          aspect-ratio: ${GAUGE_VIEWBOX_WIDTH} / ${GAUGE_VIEWBOX_HEIGHT};
+          overflow: hidden;
           display: block;
         }
         .gauge-marker-group {
@@ -295,7 +309,7 @@ class CurvedGaugeCard extends HTMLElement {
       }
 
         <div class="gauge-wrapper">
-          <svg class="gauge-svg" viewBox="0 0 280 155">
+          <svg class="gauge-svg" viewBox="0 0 ${GAUGE_VIEWBOX_WIDTH} ${GAUGE_VIEWBOX_HEIGHT}">
             <defs>
               <path id="guide-outer-${this._uid}" d="M 28 146 A 112 112 0 0 1 252 146" fill="none" />
               <path id="guide-inner-${this._uid}" d="M 58 146 A 82 82 0 0 1 222 146" fill="none" />
@@ -559,7 +573,19 @@ class CurvedGaugeCard extends HTMLElement {
   }
 
   getCardSize() {
-    return 3;
+    // Masonry only (~50px per unit). Follows header on/off; not a sections row count.
+    return this._config && this._config.show_header === false ? 3 : 4;
+  }
+
+  // Sections view (HA 2024.11+). Do not set `rows`: HA then sizes to the
+  // card's intrinsic height (SVG aspect-ratio + optional header), which
+  // works for any column width, header, and theme. Same pattern as the
+  // built-in gauge card. YAML `grid_options.rows` still pins a cell if wanted.
+  getGridOptions() {
+    return {
+      columns: 6,
+      min_columns: 3,
+    };
   }
 }
 
@@ -755,7 +781,7 @@ window.customCards.push({
 });
 
 console.info(
-  "%c GAUGE-CARD %c v1.0.1 Optimized ",
+  "%c GAUGE-CARD %c v1.0.2 ",
   "color: white; background: #10B981; font-weight: bold; border-radius: 4px;",
   "color: #10B981; background: transparent;"
 );
