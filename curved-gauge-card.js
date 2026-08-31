@@ -152,7 +152,8 @@ class CurvedGaugeCard extends HTMLElement {
       <style>
         :host {
           display: block;
-          contain: content;
+          height: 100%;
+          box-sizing: border-box;
         }
         ha-card {
           background: var(--ha-card-background, var(--card-background-color, var(--ha-card-background, #ffffff)));
@@ -167,12 +168,16 @@ class CurvedGaugeCard extends HTMLElement {
           position: relative;
           overflow: hidden;
           cursor: pointer;
+          height: 100%;
+          display: flex;
+          flex-direction: column;
         }
         .header {
           display: flex;
           justify-content: space-between;
           align-items: flex-start;
           margin-bottom: 6px;
+          flex-shrink: 0;
         }
         .header-text {
           display: flex;
@@ -215,13 +220,17 @@ class CurvedGaugeCard extends HTMLElement {
           display: flex;
           flex-direction: column;
           align-items: center;
+          justify-content: center;
           margin-top: 4px;
+          flex: 1 1 auto;
+          min-height: 0;
         }
         .gauge-svg {
           width: 100%;
           max-width: 340px;
           height: auto;
-          overflow: visible;
+          aspect-ratio: 280 / 155;
+          overflow: hidden;
           display: block;
         }
         .gauge-marker-group {
@@ -559,7 +568,19 @@ class CurvedGaugeCard extends HTMLElement {
   }
 
   getCardSize() {
-    return 3;
+    return 5;
+  }
+
+  // Sections view (HA 2024.11+). Cell is 56px + 8px gap.
+  // Header + 280x155 viewBox need about 5 rows; 4 is the floor so the
+  // visual editor cannot persist rows: 2 and overflow into the next section.
+  getGridOptions() {
+    return {
+      columns: 6,
+      min_columns: 3,
+      rows: 5,
+      min_rows: 4,
+    };
   }
 }
 
@@ -755,7 +776,7 @@ window.customCards.push({
 });
 
 console.info(
-  "%c GAUGE-CARD %c v1.0.1 Optimized ",
+  "%c GAUGE-CARD %c v1.0.2 ",
   "color: white; background: #10B981; font-weight: bold; border-radius: 4px;",
   "color: #10B981; background: transparent;"
 );
