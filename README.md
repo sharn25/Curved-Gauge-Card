@@ -51,9 +51,9 @@ Works out of the box with **ANY numeric Home Assistant entity** (Temperature, Hu
 
 ### Sections view
 
-The card implements `getGridOptions()` for Lovelace sections (Home Assistant 2024.11+). Default size is **6 columns by 5 rows**. Minimum height is 4 rows so the visual editor cannot collapse the card to a header strip and let the arc overflow into the next section.
+The card implements `getGridOptions()` for Lovelace sections (Home Assistant 2024.11+). It asks for **6 columns** by default (half a section) and does **not** pin a row count. Height comes from the SVG aspect ratio plus the optional header, so it stays correct if you hide the header, change column width, or use a custom theme.
 
-If a saved dashboard still has `grid_options.rows: 2` from an older editor pass, raise it to `5` (or remove `rows` and let the card default apply after upgrading).
+If an older editor pass saved `grid_options.rows: 2` (header-only measurement), remove `rows` from that card so it can size itself again. You can still set `grid_options.rows` in YAML when you want a fixed cell; the card then fills that height.
 
 ---
 

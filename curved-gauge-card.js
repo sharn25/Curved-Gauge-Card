@@ -4,6 +4,11 @@
  * Features curved textPath labels, boundary ticks, active bead marker, and dynamic HA GUI editor.
  */
 
+// Drawing coordinate space. CSS aspect-ratio must match so the card has an
+// intrinsic height in sections view before paint (no hardcoded row count).
+const GAUGE_VIEWBOX_WIDTH = 280;
+const GAUGE_VIEWBOX_HEIGHT = 155;
+
 class CurvedGaugeCard extends HTMLElement {
   constructor() {
     super();
@@ -229,7 +234,7 @@ class CurvedGaugeCard extends HTMLElement {
           width: 100%;
           max-width: 340px;
           height: auto;
-          aspect-ratio: 280 / 155;
+          aspect-ratio: ${GAUGE_VIEWBOX_WIDTH} / ${GAUGE_VIEWBOX_HEIGHT};
           overflow: hidden;
           display: block;
         }
@@ -304,7 +309,7 @@ class CurvedGaugeCard extends HTMLElement {
       }
 
         <div class="gauge-wrapper">
-          <svg class="gauge-svg" viewBox="0 0 280 155">
+          <svg class="gauge-svg" viewBox="0 0 ${GAUGE_VIEWBOX_WIDTH} ${GAUGE_VIEWBOX_HEIGHT}">
             <defs>
               <path id="guide-outer-${this._uid}" d="M 28 146 A 112 112 0 0 1 252 146" fill="none" />
               <path id="guide-inner-${this._uid}" d="M 58 146 A 82 82 0 0 1 222 146" fill="none" />
@@ -568,18 +573,18 @@ class CurvedGaugeCard extends HTMLElement {
   }
 
   getCardSize() {
-    return 5;
+    // Masonry only (~50px per unit). Follows header on/off; not a sections row count.
+    return this._config && this._config.show_header === false ? 3 : 4;
   }
 
-  // Sections view (HA 2024.11+). Cell is 56px + 8px gap.
-  // Header + 280x155 viewBox need about 5 rows; 4 is the floor so the
-  // visual editor cannot persist rows: 2 and overflow into the next section.
+  // Sections view (HA 2024.11+). Do not set `rows`: HA then sizes to the
+  // card's intrinsic height (SVG aspect-ratio + optional header), which
+  // works for any column width, header, and theme. Same pattern as the
+  // built-in gauge card. YAML `grid_options.rows` still pins a cell if wanted.
   getGridOptions() {
     return {
       columns: 6,
       min_columns: 3,
-      rows: 5,
-      min_rows: 4,
     };
   }
 }
